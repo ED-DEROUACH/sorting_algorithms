@@ -1,5 +1,10 @@
 #include "sort.h"
 
+void swap_ints(int *a, int *b);
+int lomuto_partition(int *array, size_t size, int left, int right);
+void lomuto_sort(int *array, size_t size, int left, int right);
+void quick_sort(int *array, size_t size);
+
 /**
  * swap_ints - Swap two integers in an array.
  * @a: The first integer to swap.
@@ -15,58 +20,64 @@ void swap_ints(int *a, int *b)
 }
 
 /**
- * hoare_partition - Perform the Hoare partition scheme.
- * @array: The array to partition.
+ * lomuto_partition - Order a subset of an array of integers according to
+ *                    the lomuto partition scheme (last element as pivot).
+ * @array: The array of integers.
  * @size: The size of the array.
- * @low: The low index of the partition.
- * @high: The high index of the partition.
+ * @left: The starting index of the subset to order.
+ * @right: The ending index of the subset to order.
  *
  * Return: The final partition index.
  */
-int hoare_partition(int *array, size_t size, int low, int high)
+int lomuto_partition(int *array, size_t size, int left, int right)
 {
-	int pivot = array[low];
-	int i = low - 1, j = high + 1;
+	int *pivot, above, below;
 
-	while (1)
+	pivot = array + right;
+	for (above = below = left; below < right; below++)
 	{
-		do {
-			i++;
-		} while (array[i] < pivot);
+		if (array[below] < *pivot)
+		{
+			if (above < below)
+			{
+				swap_ints(array + below, array + above);
+				print_array(array, size);
+			}
+			above++;
+		}
+	}
 
-		do {
-			j--;
-		} while (array[j] > pivot);
-
-		if (i >= j)
-			return j;
-
-		swap_ints(&array[i], &array[j]);
+	if (array[above] > *pivot)
+	{
+		swap_ints(array + above, pivot);
 		print_array(array, size);
 	}
+
+	return (above);
 }
 
 /**
- * hoare_sort - Implement the quicksort algorithm using the Hoare partition scheme.
+ * lomuto_sort - Implement the quicksort algorithm through recursion.
  * @array: An array of integers to sort.
  * @size: The size of the array.
- * @low: The low index of the partition.
- * @high: The high index of the partition.
+ * @left: The starting index of the array partition to order.
+ * @right: The ending index of the array partition to order.
  */
-void hoare_sort(int *array, size_t size, int low, int high)
+void lomuto_sort(int *array, size_t size, int left, int right)
 {
-	int partition;
+	int part;
 
-	if (low < high)
+	if (right - left > 0)
 	{
-		partition = hoare_partition(array, size, low, high);
-		hoare_sort(array, size, low, partition);
-		hoare_sort(array, size, partition + 1, high);
+		part = lomuto_partition(array, size, left, right);
+		lomuto_sort(array, size, left, part - 1);
+		lomuto_sort(array, size, part + 1, right);
 	}
 }
 
 /**
- * quick_sort - Sort an array of integers in ascending order using the quicksort algorithm.
+ * quick_sort - Sort an array of integers in ascending
+ *              order using the quicksort algorithm.
  * @array: An array of integers.
  * @size: The size of the array.
  */
@@ -75,6 +86,5 @@ void quick_sort(int *array, size_t size)
 	if (array == NULL || size < 2)
 		return;
 
-	hoare_sort(array, size, 0, size - 1);
+	lomuto_sort(array, size, 0, size - 1);
 }
-
